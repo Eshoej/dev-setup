@@ -1,0 +1,40 @@
+- hosts: localhost
+  vars:
+    zsh_dependencies: []
+  tasks:
+  - name: Include main vars
+    ansible.builtin.include_vars:
+      file: vars.yml
+
+  - name: Ensure Zsh with dependencies are installed
+    apt:
+      name: "{{ ['zsh'] + zsh_dependencies }}"
+      state: present
+      update_cache: yes
+    become: true
+
+  - name: Ensure zsh is the default shell for the user
+    user:
+      name: "{{ username }}"
+      shell: "/usr/bin/zsh"
+    become: true
+
+  - name: Download Oh My Zsh installation script
+    get_url:
+      url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+      dest: /tmp/install_ohmyzsh.sh
+
+  - name: Run Oh My Zsh installation script
+    command: sh /tmp/install_ohmyzsh.sh --unattended
+    register: ohmyzsh_result
+    failed_when: "'FAILED' in ohmyzsh_result.stderr"
+
+  - name: Ensure .zshrc exists for user
+    copy:
+      src: /root/.oh-my-zsh/templates/zshrc.zsh-template
+      dest: "{{ home }}/.zshrc"
+      owner: "{{ username }}"
+      group: "{{ username }}"
+      mode: '0644'
+    become: true
+
