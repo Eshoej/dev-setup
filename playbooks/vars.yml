@@ -1,5 +1,5 @@
 username: "eshoej"
 email: "morten@eshoej.com"  
-ssh_key_filename: "id_theprimeagen_rsa"
+ssid_theprimeagen_rsah_key_filename: "id_eshoej_rsa"
 config: "{{ lookup('ansible.builtin.env', 'XDG_CONFIG') }}"
 home: "{{ lookup('ansible.builtin.env', 'HOME') }}"

@@ -62,4 +62,14 @@
     - name: Display git username
       debug:
         msg: "Git username is {{ git_username_output.stdout }}"
+    
+    - name: Verify git email is set
+      become_user: "{{ username }}"
+      command: git config --global user.email
+      register: git_email_output
+      failed_when: git_email_output.stdout.strip() == ''
+      changed_when: false
 
+    - name: Display git email
+      debug:
+        msg: "Git email is {{ git_email_output.stdout }}"
