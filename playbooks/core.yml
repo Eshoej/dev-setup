@@ -47,10 +47,8 @@
 
     - name: user.email for git config
       become_user: "{{ username }}"
-      community.general.git_config:
-        name: user.email
-        scope: global
-        value: "{{ email }}"
+      ansible.builtin.command:
+        cmd: 
 
     - name: Verify git username is set
       become_user: "{{ username }}"
