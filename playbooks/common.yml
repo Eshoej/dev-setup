@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  become: true  # Become root for task execution
+  vars:
+    packages:
+      - fzf
+      - ripgrep
+      - pavucontrol
+      - xclip
+      - jq
+      - tldr
+      - shutter
+  tasks:
+    - name: Install all the libraries I love
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes  # Update cache to ensure the latest version is installed
+      loop: "{{ packages }}"  # Loop over the list of packages
+

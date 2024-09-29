@@ -1,0 +1,65 @@
+- hosts: localhost
+  tasks:
+    
+    - name: Include main vars
+      ansible.builtin.include_vars:
+        file: vars.yml
+
+    - name: Intall core software
+      become: true
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - git
+          - docker
+          - docker-compose
+          - python3-pip
+      loop: "{{ packages }}"
+
+    - name: Ensure group "docker" exists with correct gid
+      become: true
+      ansible.builtin.group:
+        name: docker
+        state: present
+    - name: Ensure required variables are defined
+      assert:
+        that:
+          - username is defined
+          - email is defined
+        fail_msg: "username and email must be defined in vars or as extra variables"
+
+    - name: Add user to docker group
+      become: true
+      ansible.builtin.user:
+        name: "{{ username }}"
+        groups: docker
+        append: true
+    
+    - name: user.name for git config
+      become_user: "{{ username }}"
+      community.general.git_config:
+        name: user.name
+        scope: global
+        value: "{{ username }}"
+
+    - name: user.email for git config
+      become_user: "{{ username }}"
+      community.general.git_config:
+        name: user.email
+        scope: global
+        value: "{{ email }}"
+
+    - name: Verify git username is set
+      become_user: "{{ username }}"
+      command: git config --global user.name
+      register: git_username_output
+      failed_when: git_username_output.stdout.strip() == ''
+      changed_when: false
+
+    - name: Display git username
+      debug:
+        msg: "Git username is {{ git_username_output.stdout }}"
+
